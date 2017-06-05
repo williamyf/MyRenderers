@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include <iostream>
+#include "device.h"
 
 //=====================================================================
 // Win32 窗口及图形绘制：为 device 提供一个 DibSection 的 FB
@@ -80,9 +81,9 @@ int window_init(int w, int h, const TCHAR *title)
 		w * h * 4, 0, 0, 0, 0 } };
 
 	LPVOID ptr = NULL;
-	//g_hBmp = CreateDIBSection(g_hDc, &bi, DIB_RGB_COLORS, &ptr, 0, 0);
-	g_hBmp = (HBITMAP)LoadImage(NULL, _T("1.bmp"), IMAGE_BITMAP, w, h,
-		LR_DEFAULTCOLOR | LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+	g_hBmp = CreateDIBSection(g_hDc, &bi, DIB_RGB_COLORS, &ptr, 0, 0);
+	//g_hBmp = (HBITMAP)LoadImage(NULL, _T("1.bmp"), IMAGE_BITMAP, w, h,
+	//	LR_DEFAULTCOLOR | LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 
 	if (g_hBmp == NULL) return -3;
 	
@@ -142,7 +143,7 @@ void window_update(void) {
 	//screen_dispatch(); // is here needed ???
 }
 
-int main() 
+int main()
 {
 	TCHAR *title = _T("Mini3D (software render tutorial) - ")
 		_T("Left/Right: rotation, Up/Down: forward/backward, Space: switch state");
@@ -150,9 +151,22 @@ int main()
 	if (window_init(800, 600, title))
 		return -1;
 
+	device_t device;
+	device_init(&device, 800, 600, g_wndFrameBuffer);
+
+	camera_at_zero(&device, 3, 0, 0);
+	init_texture(&device);
+	device.render_state = RENDER_STATE_TEXTURE;
+
+	float pos = 3.5;
+	float alpha = 1;
+
 	while (!g_exit && g_keys[VK_ESCAPE] == 0)
 	{
 		dispatch_msg();
+
+		device_clear(&device, 1);
+		camera_at_zero(&device, pos, 0, 0);
 
 		if (g_keys[VK_UP]) {
 			std::cout << "VK_UP down" << std::endl;
@@ -171,6 +185,8 @@ int main()
 		}
 		else {
 		}
+
+		//draw_box(&device, alpha);
 
 		window_update();
 
