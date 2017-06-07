@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <assert.h>
 #include "matrix.h"
+#include <iostream>
 
 int CMID(int x, int min, int max) { return (x < min) ? min : ((x > max) ? max : x); }
 
@@ -38,6 +39,8 @@ void device_init(device_t *device, int width, int height, void *fb)
 	
 	device->zbuffer = (float**)(ptr + sizeof(void*) * height);
 
+	std::cout <<"zbuffer 与 framebuffer 相距字节数："<< ((char*)device->zbuffer - (char*)device->framebuffer) << std::endl;
+
 	ptr += sizeof(void*) * height * 2;
 	device->texture = (unsigned int**)ptr;
 
@@ -65,7 +68,7 @@ void device_init(device_t *device, int width, int height, void *fb)
 	device->background = 0xc0c0c0;
 	device->foreground = 0;
 
-	transform_init(&device->transform, width, height);
+	transform_init(&device->transform, width, height);// 此句实质上是设置了一个投影矩阵
 	device->render_state = RENDER_STATE_WIREFRAME;
 }
 
@@ -162,7 +165,8 @@ typedef struct { vertex_t v, v1, v2; } edge_t;
 typedef struct { float top, bottom; edge_t left, right; } trapezoid_t;
 typedef struct { vertex_t v, step; int x, y, w; } scanline_t;
 
-void vertex_rhw_init(vertex_t *v) {
+void vertex_rhw_init(vertex_t *v) 
+{
 	float rhw = 1.0f / v->pos.w;
 	v->rhw = rhw;
 	v->tc.u *= rhw;
@@ -423,8 +427,8 @@ void device_render_trap(device_t *device, trapezoid_t *trap) {
 }
 
 // 根据 render_state 绘制原始三角形
-void device_draw_primitive(device_t *device, const vertex_t *v1,
-	const vertex_t *v2, const vertex_t *v3) {
+void device_draw_primitive(device_t *device, const vertex_t *v1, const vertex_t *v2, const vertex_t *v3) 
+{
 	point_t p1, p2, p3, c1, c2, c3;
 	int render_state = device->render_state;
 
@@ -445,7 +449,8 @@ void device_draw_primitive(device_t *device, const vertex_t *v1,
 	transform_homogenize(&device->transform, &p3, &c3);
 
 	// 纹理或者色彩绘制
-	if (render_state & (RENDER_STATE_TEXTURE | RENDER_STATE_COLOR)) {
+	if (render_state & (RENDER_STATE_TEXTURE | RENDER_STATE_COLOR)) 
+	{
 		vertex_t t1 = *v1, t2 = *v2, t3 = *v3;
 		trapezoid_t traps[2];
 		int n;

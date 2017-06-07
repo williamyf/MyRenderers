@@ -154,8 +154,8 @@ int main()
 	device_t device;
 	device_init(&device, 800, 600, g_wndFrameBuffer);
 
-	camera_at_zero(&device, 3, 0, 0);
-	init_texture(&device);
+	//camera_at_zero(&device, 3, 0, 0);
+	//init_texture(&device);
 	device.render_state = RENDER_STATE_TEXTURE;
 
 	float pos = 3.5;
@@ -165,8 +165,8 @@ int main()
 	{
 		dispatch_msg();
 
-		device_clear(&device, 1);
-		camera_at_zero(&device, pos, 0, 0);
+		device_clear(&device, 0);
+		//camera_at_zero(&device, pos, 0, 0);
 
 		if (g_keys[VK_UP]) {
 			std::cout << "VK_UP down" << std::endl;
