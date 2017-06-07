@@ -25,7 +25,8 @@ void transform_init(transform_t *ts, int width, int height) {
 }
 
 // 将矢量 x 进行 project 
-void transform_apply(const transform_t *ts, vector_t *y, const vector_t *x) {
+void transform_apply(const transform_t *ts, vector_t *y, const vector_t *x) 
+{
 	matrix_apply(y, x, &ts->transform);
 }
 
@@ -65,8 +66,8 @@ void device_init(device_t *device, int width, int height, void *fb)
 	device->max_v = 1.0f;
 	device->width = width;
 	device->height = height;
-	device->background = 0xc0c0c0;
-	device->foreground = 0;
+	device->background = 0xf0c0f0;
+	device->foreground = 0x0000f0;
 
 	transform_init(&device->transform, width, height);// 此句实质上是设置了一个投影矩阵
 	device->render_state = RENDER_STATE_WIREFRAME;
@@ -91,7 +92,8 @@ void device_set_texture(device_t *device, void *bits, long pitch, int w, int h) 
 	device->max_v = (float)(h - 1);
 }
 
-void init_texture(device_t *device) {
+void init_texture(device_t *device) 
+{
 	static unsigned int texture[256][256];
 	int i, j;
 	for (j = 0; j < 256; j++) {
@@ -132,7 +134,8 @@ void device_clear(device_t *device, int mode) {
 
 
 // 检查齐次坐标同 cvv 的边界用于视锥裁剪
-int transform_check_cvv(const vector_t *v) {
+int transform_check_cvv(const vector_t *v) 
+{
 	float w = v->w;
 	int check = 0;
 	if (v->z < 0.0f) check |= 1;
@@ -200,7 +203,8 @@ void vertex_division(vertex_t *y, const vertex_t *x1, const vertex_t *x2, float 
 	y->rhw = (x2->rhw - x1->rhw) * inv;
 }
 
-void vertex_add(vertex_t *y, const vertex_t *x) {
+void vertex_add(vertex_t *y, const vertex_t *x) 
+{
 	y->pos.x += x->pos.x;
 	y->pos.y += x->pos.y;
 	y->pos.z += x->pos.z;
@@ -214,8 +218,8 @@ void vertex_add(vertex_t *y, const vertex_t *x) {
 }
 
 // 根据三角形生成 0-2 个梯形，并且返回合法梯形的数量
-int trapezoid_init_triangle(trapezoid_t *trap, const vertex_t *p1,
-	const vertex_t *p2, const vertex_t *p3) {
+int trapezoid_init_triangle(trapezoid_t *trap, const vertex_t *p1, const vertex_t *p2, const vertex_t *p3) 
+{
 	const vertex_t *p;
 	float k, x;
 
@@ -356,7 +360,8 @@ void device_draw_line(device_t *device, int x1, int y1, int x2, int y2, unsigned
 }
 
 // 根据坐标读取纹理
-unsigned int device_texture_read(const device_t *device, float u, float v) {
+unsigned int device_texture_read(const device_t *device, float u, float v) 
+{
 	int x, y;
 	u = u * device->max_u;
 	v = v * device->max_v;
@@ -372,7 +377,8 @@ unsigned int device_texture_read(const device_t *device, float u, float v) {
 //=====================================================================
 
 // 绘制扫描线
-void device_draw_scanline(device_t *device, scanline_t *scanline) {
+void device_draw_scanline(device_t *device, scanline_t *scanline) 
+{
 	unsigned int *framebuffer = device->framebuffer[scanline->y];
 	float *zbuffer = device->zbuffer[scanline->y];
 	int x = scanline->x;
@@ -411,7 +417,8 @@ void device_draw_scanline(device_t *device, scanline_t *scanline) {
 }
 
 // 主渲染函数
-void device_render_trap(device_t *device, trapezoid_t *trap) {
+void device_render_trap(device_t *device, trapezoid_t *trap) 
+{
 	scanline_t scanline;
 	int j, top, bottom;
 	top = (int)(trap->top + 0.5f);
@@ -453,7 +460,6 @@ void device_draw_primitive(device_t *device, const vertex_t *v1, const vertex_t 
 	{
 		vertex_t t1 = *v1, t2 = *v2, t3 = *v3;
 		trapezoid_t traps[2];
-		int n;
 
 		t1.pos = p1;
 		t2.pos = p2;
@@ -467,7 +473,7 @@ void device_draw_primitive(device_t *device, const vertex_t *v1, const vertex_t 
 		vertex_rhw_init(&t3);	// 初始化 w
 
 								// 拆分三角形为0-2个梯形，并且返回可用梯形数量
-		n = trapezoid_init_triangle(traps, &t1, &t2, &t3);
+		int n = trapezoid_init_triangle(traps, &t1, &t2, &t3);
 
 		if (n >= 1) device_render_trap(device, &traps[0]);
 		if (n >= 2) device_render_trap(device, &traps[1]);
@@ -494,15 +500,19 @@ vertex_t mesh[8] = {
 	{ { 1,  1, -1, 1 },{ 1, 0 },{ 0.2f, 1.0f, 0.3f }, 1 },
 };
 
-void draw_plane(device_t *device, int a, int b, int c, int d) {
+void draw_plane(device_t *device, int a, int b, int c, int d) 
+{
 	vertex_t p1 = mesh[a], p2 = mesh[b], p3 = mesh[c], p4 = mesh[d];
-	p1.tc.u = 0, p1.tc.v = 0, p2.tc.u = 0, p2.tc.v = 1;
-	p3.tc.u = 1, p3.tc.v = 1, p4.tc.u = 1, p4.tc.v = 0;
+	p1.tc.u = 0, p1.tc.v = 0;
+	p2.tc.u = 0, p2.tc.v = 1;
+	p3.tc.u = 1, p3.tc.v = 1;
+	p4.tc.u = 1, p4.tc.v = 0;
 	device_draw_primitive(device, &p1, &p2, &p3);
 	device_draw_primitive(device, &p3, &p4, &p1);
 }
 
-void draw_box(device_t *device, float theta) {
+void draw_box(device_t *device, float theta) 
+{
 	matrix_t m;
 	matrix_set_rotate(&m, -1, -0.5, 1, theta);
 	device->transform.world = m;

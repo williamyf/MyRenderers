@@ -2,6 +2,7 @@
 #include <tchar.h>
 #include <iostream>
 #include "device.h"
+#include "resource1.h"
 
 //=====================================================================
 // Win32 窗口及图形绘制：为 device 提供一个 DibSection 的 FB
@@ -61,8 +62,11 @@ int window_init(int w, int h, const TCHAR *title)
 {
 	window_close();
 
+	LPCTSTR menustr = MAKEINTRESOURCE(IDR_MENU_SETING);
+	std::cout << "menu: " << menustr << std::endl;
+
 	WNDCLASS wc = { CS_BYTEALIGNCLIENT, (WNDPROC)window_events, 0, 0, 0,
-		NULL, NULL, NULL, NULL, _T("SCREEN3.1415926") };	
+		NULL, NULL, NULL, menustr, _T("SCREEN3.1415926") };	
 	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.hInstance = GetModuleHandle(NULL);
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -155,18 +159,25 @@ int main()
 	device_init(&device, 800, 600, g_wndFrameBuffer);
 
 	//camera_at_zero(&device, 3, 0, 0);
-	//init_texture(&device);
+	init_texture(&device);
+	
+	
+	int states[] = { RENDER_STATE_TEXTURE, RENDER_STATE_COLOR, RENDER_STATE_WIREFRAME };
+	std::cout << "sizeof(states)/sizeof(int) = " << sizeof(states)/sizeof(int) << std::endl;
+
 	device.render_state = RENDER_STATE_TEXTURE;
 
 	float pos = 3.5;
 	float alpha = 1;
+	int bgmode = 0;
+	bool kbhit = false; // 按键是否按下
 
 	while (!g_exit && g_keys[VK_ESCAPE] == 0)
 	{
 		dispatch_msg();
 
-		device_clear(&device, 0);
-		//camera_at_zero(&device, pos, 0, 0);
+		device_clear(&device, bgmode);
+		camera_at_zero(&device, pos, 0, 0);
 
 		if (g_keys[VK_UP]) {
 			std::cout << "VK_UP down" << std::endl;
@@ -181,12 +192,24 @@ int main()
 			std::cout << "VK_RIGHT down" << std::endl;
 		}
 		if (g_keys[VK_SPACE]) {
-			std::cout << "VK_SPACE down" << std::endl;
+			if (!kbhit) {
+				kbhit = true;
+				static int indicator = 0;
+				indicator = (++indicator) % (sizeof(states) / sizeof(int));
+				std::cout << "indicator = " << indicator << std::endl;
+				device.render_state = states[indicator];
+			}
+		} else {
+			kbhit = false;
 		}
-		else {
+		if (g_keys['Q']) {
+			bgmode = 1;
+		}
+		if (g_keys['W']) {
+			bgmode = 0;
 		}
 
-		//draw_box(&device, alpha);
+		draw_box(&device, alpha);
 
 		window_update();
 
