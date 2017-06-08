@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "matrix.h"
 #include <iostream>
+#include <fstream>
 
 int CMID(int x, int min, int max) { return (x < min) ? min : ((x > max) ? max : x); }
 
@@ -73,7 +74,8 @@ void device_init(device_t *device, int width, int height, void *fb)
 	device->render_state = RENDER_STATE_WIREFRAME;
 }
 
-void camera_at_zero(device_t *device, float x, float y, float z) {
+void camera_at_zero(device_t *device, float x, float y, float z) 
+{
 	point_t eye = { x, y, z, 1 }, at = { 0, 0, 0, 1 }, up = { 0, 0, 1, 1 };
 	matrix_set_lookat(&device->transform.view, &eye, &at, &up);
 	transform_update(&device->transform);
@@ -94,15 +96,27 @@ void device_set_texture(device_t *device, void *bits, long pitch, int w, int h) 
 
 void init_texture(device_t *device) 
 {
-	static unsigned int texture[256][256];
-	int i, j;
-	for (j = 0; j < 256; j++) {
-		for (i = 0; i < 256; i++) {
-			int x = i / 32, y = j / 32;
-			texture[j][i] = ((x + y) & 1) ? 0xffffff : 0x3fbcef;
-		}
+	//static unsigned int texture[256][256];
+	//int i, j;
+	//for (j = 0; j < 256; j++) {
+	//	for (i = 0; i < 256; i++) {
+	//		int x = i / 32, y = j / 32;
+	//		texture[j][i] = ((x + y) & 1) ? 0xffffff : 0x3fbcef;
+	//	}
+	//}
+	//device_set_texture(device, texture, 256 * 4, 256, 256);
+
+	int w = 460, h = 613;
+	unsigned int *texture = new unsigned int[w*h];
+	std::ifstream ifs("Í¼ÏñÏñËØ.txt");
+	for (int i=0; i<w*h; i++)
+	{
+		int r, g, b;
+		ifs >> r >> g >> b;
+		texture[i] = b << 16 | g << 8 | r;
 	}
-	device_set_texture(device, texture, 256 * 4, 256, 256);
+	ifs.close();
+	device_set_texture(device, (void*)texture, w * 4, w, h);
 }
 
 // Çå¿Õ framebuffer ºÍ zbuffer
@@ -513,10 +527,11 @@ void draw_plane(device_t *device, int a, int b, int c, int d)
 
 void draw_box(device_t *device, float theta) 
 {
-	matrix_t m;
-	matrix_set_rotate(&m, -1, -0.5, 1, theta);
-	device->transform.world = m;
-	transform_update(&device->transform);
+	//matrix_t m;
+	//matrix_set_rotate(&m, -1, -0.5, 1, theta);
+	//matrix_set_rotate(&m, 1, 0, 0, theta);
+	//device->transform.world = m;
+	//transform_update(&device->transform);
 	draw_plane(device, 0, 1, 2, 3);
 	draw_plane(device, 4, 5, 6, 7);
 	draw_plane(device, 0, 4, 5, 1);

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "device.h"
 #include "resource1.h"
+#include "bmpoper.h"
 
 //=====================================================================
 // Win32 窗口及图形绘制：为 device 提供一个 DibSection 的 FB
@@ -149,6 +150,9 @@ void window_update(void) {
 
 int main()
 {
+	//doIt();
+	//return 0;
+
 	TCHAR *title = _T("Mini3D (software render tutorial) - ")
 		_T("Left/Right: rotation, Up/Down: forward/backward, Space: switch state");
 
@@ -177,19 +181,19 @@ int main()
 		dispatch_msg();
 
 		device_clear(&device, bgmode);
-		camera_at_zero(&device, pos, 0, 0);
+		camera_at_zero(&device,0, 0, pos);
 
 		if (g_keys[VK_UP]) {
-			std::cout << "VK_UP down" << std::endl;
+			pos -= 0.01f;
 		}
 		if (g_keys[VK_DOWN]) {
-			std::cout << "VK_DOWN down" << std::endl;
+			pos += 0.01f;
 		}
 		if (g_keys[VK_LEFT]) {
-			std::cout << "VK_LEFT down" << std::endl;
+			alpha += 0.02f;
 		}
 		if (g_keys[VK_RIGHT]) {
-			std::cout << "VK_RIGHT down" << std::endl;
+			alpha -= 0.02f;
 		}
 		if (g_keys[VK_SPACE]) {
 			if (!kbhit) {
