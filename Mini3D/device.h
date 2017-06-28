@@ -51,4 +51,4 @@ void device_clear(device_t *device, int mode);
 
 
 
-void draw_box(device_t *device, float theta);
+void draw_box(device_t *device, vector_t axis, float theta);

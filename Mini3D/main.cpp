@@ -175,13 +175,43 @@ int main()
 	float alpha = 1;
 	int bgmode = 0;
 	bool kbhit = false; // 按键是否按下
+	bool a_hit = false; // A键是否按下
+	int  axis_ind = 0;
+	vector_t axis[] = { {1,0,0,1},{0,1,0,1},{0,0,1,1} };
+	bool z_hit = false; // Z键是否按下
+	int  lookat_ind = 0;
+
+	auto print_rotate_tip = [](int ind) {
+		if (ind == 0) {
+			std::cout << "绕X轴旋转" << std::endl;
+		} else if (ind == 1) {
+			std::cout << "绕Y轴旋转" << std::endl;
+		} else {
+			std::cout << "绕Z轴旋转" << std::endl;
+		}		
+	};
+	auto print_lookat_tip = [](int ind) {
+		if (ind == 0) {
+			std::cout << "沿X轴负方向看向原点" << std::endl;
+		}
+		else if (ind == 1) {
+			std::cout << "沿Y轴负方向看向原点" << std::endl;
+		}
+		else {
+			std::cout << "沿Z轴负方向看向原点" << std::endl;
+		}
+	};
+	print_rotate_tip(axis_ind);
+	print_lookat_tip(lookat_ind);
 
 	while (!g_exit && g_keys[VK_ESCAPE] == 0)
 	{
 		dispatch_msg();
 
+		vector_t lookat_pos[3] = { { pos,0,0,1 },{ 0,pos,0,1 },{ 0,0,pos,1 } };
+
 		device_clear(&device, bgmode);
-		camera_at_zero(&device,0, 0, pos);
+		camera_at_zero(&device, lookat_pos[lookat_ind].x, lookat_pos[lookat_ind].y, lookat_pos[lookat_ind].z);
 
 		if (g_keys[VK_UP]) {
 			pos -= 0.01f;
@@ -212,8 +242,28 @@ int main()
 		if (g_keys['W']) {
 			bgmode = 0;
 		}
+		if (g_keys['A']) {
+			if (!a_hit)
+			{
+				a_hit = true;
+				axis_ind = ++axis_ind % 3;
+				print_rotate_tip(axis_ind);
+			}
+		} else {
+			a_hit = false;
+		}
+		if (g_keys['Z']) {
+			if (!z_hit)
+			{
+				z_hit = true;
+				lookat_ind = ++lookat_ind % 3;
+				print_lookat_tip(lookat_ind);
+			}
+		} else {
+			z_hit = false;
+		}
 
-		draw_box(&device, alpha);
+		draw_box(&device, axis[axis_ind], alpha);
 
 		window_update();
 

@@ -525,13 +525,13 @@ void draw_plane(device_t *device, int a, int b, int c, int d)
 	device_draw_primitive(device, &p3, &p4, &p1);
 }
 
-void draw_box(device_t *device, float theta) 
+void draw_box(device_t *device, vector_t axis, float theta) 
 {
-	//matrix_t m;
-	//matrix_set_rotate(&m, -1, -0.5, 1, theta);
-	//matrix_set_rotate(&m, 1, 0, 0, theta);
-	//device->transform.world = m;
-	//transform_update(&device->transform);
+	matrix_t m;
+	matrix_set_rotate(&m, axis.x, axis.y, axis.z, theta);
+	device->transform.world = m;
+	transform_update(&device->transform);
+
 	draw_plane(device, 0, 1, 2, 3);
 	draw_plane(device, 4, 5, 6, 7);
 	draw_plane(device, 0, 4, 5, 1);

@@ -120,6 +120,10 @@ void matrix_set_lookat(matrix_t *m, const vector_t *eye, const vector_t *at, con
 	vector_normalize(&zaxis);
 	vector_crossproduct(&xaxis, up, &zaxis);
 	vector_normalize(&xaxis);
+	if (xaxis.x == 0 && xaxis.y == 0 && xaxis.z == 0)
+	{
+		xaxis = { 1,0,0,1 };
+	}
 	vector_crossproduct(&yaxis, &zaxis, &xaxis);
 
 	m->m[0][0] = xaxis.x;
